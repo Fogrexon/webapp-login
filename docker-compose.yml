@@ -34,7 +34,7 @@ services:
       # MySQL起動時にDBを作成する
       - "./docker/mysql/init/:/docker-entrypoint-initdb.d"
   # ここからはGolangのアプリケーションに対する情報
-  lecture-login:
+  lecture-api:
     # mysqlのコンテナとリンク付けする
     # mysqlコンテナを起動してからsample_docker_composeを起動してくれるようになる
     links:
@@ -42,13 +42,32 @@ services:
     build:
       context: .
       dockerfile: ./docker/golang/Dockerfile
-    container_name: sample_docker_compose
+    container_name: lecture-api
     ports:
       - "4000:4000"
     volumes:
-      - .:/go/src/sample_docker_compose
+      - .:/go/src/lecture-api
     # docker-compose run実行時に実行される
     command: sh ./start_app.sh
+    environment:
+      DB_USERNAME: root
+      DB_PASSWORD: password
+      DB_HOSTNAME: mysql
+      DB_PORT: 3306
+      DB_DATABASE: world
+  lecture-client:
+    links:
+      - lecture-api
+    build:
+      context: .
+      dockerfile: ./docker/vue/Dockerfile
+    container_name: lecture-client
+    ports:
+      - "8080:8080"
+      - "8000:8000"
+    volumes:
+      - .:/home/vue
+      
 # トップレベルでvolumesを定義すると、各サービスからボリュームを参照できる
 volumes:
   db-data:
