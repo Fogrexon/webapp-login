@@ -3,7 +3,7 @@ FROM node:lts-alpine
 RUN apk add git
 
 # 静的コンテンツを配信するシンプルな http サーバをインストールする
-RUN npm install -g http-server @vue/cli
+RUN npm install -g http-server @vue/cli axios
 
 # カレントワーキングディレクトリとして 'app' フォルダを指定する
 WORKDIR /app

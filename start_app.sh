@@ -7,4 +7,4 @@ until mysqladmin ping -h mysql --silent; do
 done
 
 echo "app is starting...!"
-exec go run ./lecture/main.go
+exec go run ./login/main.go
