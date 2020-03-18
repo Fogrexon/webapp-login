@@ -3,7 +3,9 @@ FROM node:lts-alpine
 RUN apk add git
 
 # 静的コンテンツを配信するシンプルな http サーバをインストールする
-RUN npm install -g http-server @vue/cli axios
+RUN npm install -g http-server @vue/cli
+RUN npm install --save axios
+RUN npm install --save eslint eslint-plugin-vue@next eslint-config-vue
 
 # カレントワーキングディレクトリとして 'app' フォルダを指定する
 WORKDIR /app
