@@ -23,6 +23,10 @@ type City struct {
 	District    string `json:"district,omitempty"  db:"District"`
 	Population  int    `json:"population,omitempty"  db:"Population"`
 }
+type Country struct {
+	Code          	string  `json:"code,omitempty"  db:"Code"`
+	Name        	string 	`json:"name,omitempty"  db:"Name"`
+}
 
 var (
 	db *sqlx.DB
@@ -52,7 +56,10 @@ func main() {
 
 	withLogin := e.Group("")
 	withLogin.Use(checkLogin)
-	withLogin.GET("/cities/:cityName", getCityInfoHandler)
+	withLogin.GET("/countries", getCountryListHandler)
+	withLogin.GET("/cities/:countryCode", getCityListHandler)
+	withLogin.GET("/city/:countryCode/:cityCode", getCityInfoHandler)
+	withLogin.GET("/whoami", getWhoAmIHandler)
 
 	e.Start(":4000")
 }
@@ -148,14 +155,46 @@ func checkLogin(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+func getCountryListHandler(c echo.Context) error {
+
+	countries := []Country{}
+	db.Select(&countries, "SELECT Code, Name FROM country ORDER BY Name")
+	if countries == nil {
+		return c.NoContent(http.StatusNotFound)
+	}
+
+	return c.JSON(http.StatusOK, countries)
+}
+func getCityListHandler(c echo.Context) error {
+	countryCode := c.Param("countryCode")
+
+	city := []City{}
+	db.Select(&city, "SELECT * FROM city WHERE CountryCode=? ORDER BY Name", countryCode)
+	if city == nil {
+		return c.NoContent(http.StatusNotFound)
+	}
+
+	return c.JSON(http.StatusOK, city)
+}
 func getCityInfoHandler(c echo.Context) error {
-	cityName := c.Param("cityName")
+	countryCode := c.Param("countryCode")
+	cityCode := c.Param("cityCode")
 
 	city := City{}
-	db.Get(&city, "SELECT * FROM city WHERE Name=?", cityName)
+	db.Get(&city, "SELECT * FROM city WHERE CountryCode=? AND ID=?", countryCode, cityCode)
 	if city.Name == "" {
 		return c.NoContent(http.StatusNotFound)
 	}
 
 	return c.JSON(http.StatusOK, city)
+}
+
+type Me struct {
+	Username string `json:"username,omitempty"  db:"username"`
+}
+
+func getWhoAmIHandler(c echo.Context) error {
+	return c.JSON(http.StatusOK, Me{
+		Username: c.Get("userName").(string),
+	})
 }

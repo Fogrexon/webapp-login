@@ -1,6 +1,12 @@
 <template>
   <div>
-    <div v-if="cityInfo">{{ cityInfo }}</div>
+    <div v-if="cityInfo">
+      <p>ID:{{ cityInfo.id }}</p>
+      <p>Name:{{ cityInfo.name }}</p>
+      <p>CountryCode:{{ cityInfo.countryCode }}</p>
+      <p>District:{{ cityInfo.district }}</p>
+      <p>Population:{{ cityInfo.population }}</p>
+    </div>
     <div v-else>街が見つかりませんでした</div>
   </div>
 </template>
@@ -15,10 +21,11 @@ export default {
     };
   },
   mounted() {
-    const cityName = this.$route.params.cityName;
+    const countryCode = this.$route.params.countryCode;
+    const cityCode = this.$route.params.cityCode;
     const obj = this;
     axios
-      .get("/api/cities/" + cityName)
+      .get(`/api/city/${countryCode}/${cityCode}`)
       .then(res => {
         this.cityInfo = res.data;
       })
